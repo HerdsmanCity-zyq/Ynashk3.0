@@ -1,0 +1,178 @@
+package com.samhk.ynashk.util;
+
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.RequestContext;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+public class Constants {
+
+    public static final String REQUESTCONTEXT = "RequestContext";
+    public static final String REQUEST = "Request";
+    public static final String RESPONSE = "Response";
+    public static final String LOGUSER = "currUser";
+    public static final String JSON = "json";
+    public static final String OSNAME = System.getProperty("os.name").toLowerCase();
+
+
+    private static ThreadLocal<HashMap<String, Object>> CurrentThreadVariable = new ThreadLocal<>();
+
+    /**
+     * 通过当前的操作系统来获取对应配置文件里的值
+     * @param key
+     * @return
+     */
+    public static String getApplicationValue(String key) {
+        if(OSNAME.contains("windows")){
+            return ResourceBundle.getBundle("applicationContext").getString(key);
+        } else {
+            return ResourceBundle.getBundle("applicationContext_Linux").getString(key);
+        }
+    }
+
+    public static DateFormat getDateFormat(String formatKey, Locale locale) {
+        DateFormat dateFormat = (SimpleDateFormat) getObject(formatKey.concat("_").concat(locale.toString()));
+        if (null == dateFormat) {
+            dateFormat = new SimpleDateFormat(formatKey, locale);
+            setObject(formatKey.concat("_").concat(locale.toString()), dateFormat);
+        }
+        return dateFormat;
+    }
+
+    public static DateFormat getDateFormat(String formatKey) {
+        return getDateFormat(formatKey, Locale.getDefault(Locale.Category.FORMAT));
+    }
+
+    public static void setObject(String key, Object value) {
+        HashMap<String, Object> map = CurrentThreadVariable.get();
+        if (null == map) {
+            map = new HashMap<>();
+            CurrentThreadVariable.set(map);
+        }
+        map.put(key, value);
+    }
+
+    public static Object getObject(String key) {
+        HashMap<String, Object> map = CurrentThreadVariable.get();
+        if (null == map) {
+            return null;
+        }
+        return map.get(key);
+    }
+
+    public static void removeObject() {
+        CurrentThreadVariable.get().clear();
+        CurrentThreadVariable.remove();
+    }
+
+    public static HttpServletRequest getRequest() {
+        return ((HttpServletRequest) getObject(Constants.REQUEST));
+    }
+
+    public static HttpServletResponse getResponse() {
+        return ((HttpServletResponse) getObject(Constants.RESPONSE));
+    }
+
+    public static HttpSession getSession() {
+        return ObjectUtils.isEmpty(getRequest()) ? null : getRequest().getSession();
+    }
+
+    public static void defaultErrorView(String View, String key, Object value, HttpServletRequest request) {
+        request.setAttribute("ErrorView", View);
+        request.setAttribute("ViewMessageKey", key);
+        request.setAttribute(key, value);
+    }
+
+    public static String getText(String key, Object... arg) {
+        return ((RequestContext) getObject(Constants.REQUESTCONTEXT)).getMessage(key, arg);
+    }
+
+    public static void Validate(String value, boolean dropdownName, int MaxLength, boolean isMust, String valueName, StringBuffer message) {
+        if (dropdownName && "0".equals(value)) {
+            value = null;
+        }
+        if (!StringUtils.isEmpty(value)) {
+            if (value.length() > MaxLength && MaxLength > -1) {
+                message.append(getText("message.common.04", valueName, MaxLength)).append(System.getProperty("line.separator"));
+            }
+        } else {
+            if (isMust) {
+                message.append(getText("message.common.02", valueName)).append(System.getProperty("line.separator"));
+            }
+        }
+    }
+
+    public static String getKeyByLang(String name_ch, String name_en, String lang) {
+        String name = "";
+        if ("zh".equals(lang)) {
+            name = name_ch;
+        } else {
+            name = name_en;
+        }
+        return name;
+    }
+
+    /**
+     * 获得该院友的id
+     *
+     * @return
+     */
+    public static String getCurrentResidentNo() {
+        String resident_no = "";
+        if (!ObjectUtils.isEmpty(Constants.getRequest()) && !StringUtils.isEmpty(Constants.getRequest().getParameter("resident_no"))) {
+            resident_no = Constants.getRequest().getParameter("resident_no");
+        } else if (!ObjectUtils.isEmpty(Constants.getSession()) && !StringUtils.isEmpty(Constants.getSession().getAttribute("resident_no"))) {
+            resident_no = (String) Constants.getSession().getAttribute("resident_no");
+        }
+        return resident_no;
+    }
+
+    /**
+     * 获得文件上传的前半部分路径
+     *
+     * @return
+     */
+    public static String setFilePath() {
+        String path = Constants.getRequest().getSession().getServletContext().getRealPath("");
+        path = path.substring(0, (path.lastIndexOf("\\") + 1));
+        path = path.concat("eSAM_File").concat("\\");
+        return path;
+    }
+
+
+    /**
+     * 获取登录IP地址
+     *
+     * @param request
+     * @return
+     * @throws UnknownHostException
+     */
+    public static String getIpAddr(HttpServletRequest request) throws UnknownHostException {
+        String ip = request.getHeader("x-forwarded-for");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if ("0:0:0:0:0:0:0:1".equals(ip) || "127.0.0.1".equals(ip)) {
+//	    			ip = "本地";
+            ip = InetAddress.getLocalHost().getHostAddress();
+        }
+        return ip;
+    }
+}

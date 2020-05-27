@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.PafVisioVersionDao">
+    <resultMap id="pafVisioVersionMap" type="pafVisioVersionVo">
+        <result property="pafId" column="PAF_id"></result>
+        <result property="projectId" column="Project_id"></result>
+        <result property="pafVisioVersion" column="PAF_visio_Version"></result>
+        <result property="designBy" column="Design_By"></result>
+        <result property="assignBy" column="Assign_By"></result>
+        <result property="assignDate" column="Assign_Date"></result>
+        <result property="estDuration" column="Est_Duration"></result>
+        <result property="codeBy" column="Code_By"></result>
+        <result property="remarkAssign" column="Remark_Assign"></result>
+        <result property="status" column="Status"></result>
+        <result property="submitStartDate" column="Submit_Start_date"></result>
+        <result property="submitDate" column="Submit_Date"></result>
+        <result property="actualDuration" column="Actual_Duration"></result>
+        <result property="remarkSubmit" column="Remark_Submit"></result>
+        <result property="chineseName" column="chinese_name"></result>
+        <result property="englishName" column="english_name"></result>
+        <association property="frameworkVo" javaType="frameworkVo">
+            <result property="frameworkName" column="Framework_Name"></result>
+        </association>
+        <association property="frameworkVersionPafVO" javaType="frameworkVersionPafVO">
+            <result property="bpwinNo" column="BPWIN_No"></result>
+            <result property="pafName" column="PAF_Name"></result>
+            <result property="pafNameChi" column="PAF_Name_Chi"></result>
+            <result property="versionsNo" column="Versions_No"></result>
+            <result property="status" column="Status"></result>
+        </association>
+        <association property="projectVo" javaType="projectVo">
+            <result property="projectName" column="Project_Name_Eng"></result>
+            <result property="projectNameChi" column="Project_Name_Chi"></result>
+        </association>
+    </resultMap>
+    <sql id="select">
+        SELECT
+	pv.*,
+	p.Project_Name_Eng,
+	p.Project_Name_Chi,
+	fvp.Versions_No,
+	fvp.PAF_Name,
+	fvp.PAF_Name_Chi,
+	fvp.BPWIN_No,
+	f.Framework_Name,
+	su.chinese_name,
+    su.english_name
+FROM
+	(
+SELECT
+	pvv.PAF_id,
+	pvv.Project_id,
+	pvv.PAF_visio_Version,
+	pvv.Assign_By,
+	DATE_FORMAT( pvv.Assign_Date, '%Y/%m/%d' ) Assign_Date,
+	pvv.Remark_Assign,
+	pvv.Code_By,
+	pvv.Est_Duration,
+	pvv.Design_By,
+	pvv.`Status`,
+	pvv.Remark_Submit,
+	pvv.Actual_Duration,
+	DATE_FORMAT( pvv.Submit_Start_date, '%Y/%m/%d' ) Submit_Start_date,
+	DATE_FORMAT( pvv.Submit_Date, '%Y/%m/%d' ) Submit_Date,
+	pvv.crd
+FROM
+	paf_visio_version pvv
+	INNER JOIN project_paf p ON p.Project_id = pvv.Project_id
+	AND p.PAF_id = pvv.PAF_id
+	) pv
+	LEFT JOIN project p on p.Project_id = pv.Project_id
+	LEFT JOIN framework_version_paf fvp on fvp.PAF_id = pv.PAF_id
+	LEFT join framework f on f.Framework_id = fvp.Framework_id
+	LEFT JOIN sys_user su ON su.USER_CODE = pv.Code_By
+    </sql>
+    <select id="getPafVisioVersionVoAll" resultMap="pafVisioVersionMap" >
+    select * from (
+        <include refid="select"/>
+        order by pv.crd desc) pvisio Group by pvisio.PAF_id,pvisio.Project_id
+    </select>
+
+    <select id="getVisioVersionAll" resultType="pafVisioVersionVo">
+        SELECT
+	pvv.PAF_id pafId,
+	pvv.Project_id projectId,
+	pvv.Design_By designBy,
+	pvv.PAF_visio_Version pafVisioVersion,
+	pvv.`Status`,
+	pvv.Remark_Assign,
+	pvv.Assign_By,
+	DATE_FORMAT( pvv.Assign_Date, '%Y/%m/%d' ) Assign_Date,
+	pvv.Est_Duration,
+	pvv.Code_By,
+	DATE_FORMAT(pvv.Submit_Start_date,'%Y/%m/%d') Submit_Start_date,
+	DATE_FORMAT(pvv.Submit_Date,'%Y/%m/%d') Submit_Date,
+	pvv.Actual_Duration,
+	pvv.Remark_Submit,
+    su.chinese_name,
+    su.english_name
+FROM
+	paf_visio_version pvv
+	LEFT JOIN sys_user su ON su.USER_CODE = pvv.Code_By
+ORDER BY
+	PAF_id,
+	PAF_visio_Version DESC
+    </select>
+
+    <update id="updatePafVisioVersion" parameterType="pafVisioVersionVo">
+        UPDATE paf_visio_version p
+        SET
+        p.Code_By = #{codeBy,jdbcType=VARCHAR},
+        p.Code_To = #{codeTo,jdbcType=VARCHAR},
+        p.Assign_Date = #{assignDate,jdbcType=VARCHAR},
+        p.Est_Duration = #{estDuration},
+        p.Assign_By = #{assignBy,jdbcType=VARCHAR},
+        p.Assign_To = #{assignTo,jdbcType=VARCHAR},
+        p.Remark_Assign = #{remarkAssign,jdbcType=VARCHAR},
+        p.`Status` = #{status},
+        p.LUU=#{luu,jdbcType=VARCHAR},
+        p.LUD = NOW()
+        WHERE
+        p.PAF_id = #{pafId,jdbcType=VARCHAR}
+        AND p.Project_id = #{projectId}
+        AND p.PAF_visio_Version = #{pafVisioVersion,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectCodeByAndAssignBy" parameterType="pafVisioVersionVo" resultType="pafVisioVersionVo">
+        select PAF_id,Project_id,PAF_visio_Version, Code_By,Assign_By from paf_visio_version
+        WHERE
+        PAF_id = #{pafId,jdbcType=VARCHAR}
+        AND Project_id = #{projectId}
+        AND PAF_visio_Version = #{pafVisioVersion,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getPafVisioVersionByVo" parameterType="pafVisioVersionVo" resultMap="pafVisioVersionMap">
+        <include refid="select"/>
+        WHERE
+        pv.PAF_id = #{pafId,jdbcType=VARCHAR}
+        AND pv.Project_id = #{projectId}
+        AND pv.PAF_visio_Version = #{pafVisioVersion,jdbcType=VARCHAR}
+    </select>
+
+
+    <insert id="insertPafVisioVersion" parameterType="PafVisioVersionVo" >
+        INSERT INTO paf_visio_version (
+        Project_id,
+        PAF_id,
+        PAF_visio_Version,
+        Design_By,
+        <if test="visioPath!=null and visioPath!=''">
+            visio_Path,
+        </if>
+        <if test="visioName!=null and visioName!=''">
+            visio_Name,
+        </if>
+        <if test="remarkId!=null and remarkId!=''">
+            Remark_id,
+        </if>
+        STATUS,
+        CRU,
+        CRD,
+        LUU,
+        LUD
+        )
+        VALUES
+        (
+        #{projectId},#{pafId},#{pafVisioVersion},#{designBy},
+        <if test="visioPath!=null and visioPath!=''">
+            #{visioPath},
+        </if>
+        <if test="visioName!=null and visioName!=''">
+            #{visioName},
+        </if>
+        <if test="remarkId!=null and remarkId!=''">
+            #{remarkId},
+        </if>
+        #{status},#{cru},now(),#{luu},now()
+        )
+
+    </insert>
+
+
+    <select id="queryPafVisioVersionIsExist" resultType="PafVisioVersionVo">
+        SELECT * FROM PAF_visio_Version
+        WHERE Project_id =#{projectId} AND PAF_id=#{pafId} AND PAF_visio_Version = #{pafVisioVersion}
+    </select>
+
+    <update id="updatePafVisioVersionBy" parameterType="PafVisioVersionVo">
+        update
+        PAF_visio_Version
+        set
+        <if test="pafVisioVersion!=null and pafVisioVersion!=''">
+            PAF_visio_Version = #{pafVisioVersion},
+        </if>
+        <if test="designBy!=null and designBy!=''">
+            Design_By=#{designBy},
+        </if>
+        <if test="visioPath!=null and visioPath!=''">
+            visio_Path = #{visioPath},
+        </if>
+        <if test="visioName!=null and visioName!=''">
+            visio_Name =  #{visioName},
+        </if>
+        <if test="remarkId!=null and remarkId!=''">
+            Remark_id = #{remarkId},
+        </if>
+        <if test="status!=null and status!=''">
+            Status = #{status},
+        </if>
+        LUU=#{luu},LUD=now()
+        WHERE Project_id =#{projectId} AND PAF_id=#{pafId} AND PAF_visio_Version = #{oldPafVisioVersion}
+    </update>
+
+
+    <select id="getLUDByIds" resultType="String">
+        select date_format(LUD,'%Y/%m/%d %H:%i:%s') from PAF_visio_Version
+        WHERE Project_id =#{projectId} AND PAF_id=#{pafId} AND PAF_visio_Version = #{oldPafVisioVersion}
+    </select>
+
+    <select id="getAllFVPByProject" resultType="FrameworkVersionPafVO">
+        SELECT
+          fvp.*
+        FROM
+          project_paf pp
+        LEFT JOIN
+            paf_visio_version pvv
+        ON
+            pvv.project_id = pp.project_id
+        AND pvv.PAF_id = pp.PAF_id
+        LEFT JOIN framework_version_paf fvp ON fvp.PAF_id = pp.PAF_id
+        WHERE pvv.project_id IS NULL
+        GROUP BY fvp.PAF_id
+    </select>
+
+    <select id="test" resultType="java.util.Map">
+        SELECT
+          p.Project_id,p.Project_Name_Chi,p.Project_Name_Eng,
+            fvp.*
+        FROM
+            framework_version_paf fvp
+        JOIN project_paf pp ON fvp.PAF_id = pp.PAF_id
+        JOIN project p ON p.Project_id = pp.Project_id
+
+    </select>
+
+
+    <select id="getLatestVisioVersion" resultType="String">
+        SELECT MAX(PAF_visio_Version) FROM paf_visio_version
+        WHERE Project_id = #{projectId} AND PAF_id = #{pafId}
+    </select>
+
+    <update id="updatePafVisioVersionBySubmit" parameterType="pafVisioVersionVo">
+        UPDATE paf_visio_version p
+        SET
+        p.`Status` = #{status},
+        p.LUU=#{luu,jdbcType=VARCHAR},
+        p.LUD = NOW(),
+        p.Submit_Start_date = #{submitStartDate,jdbcType=VARCHAR},
+        p.Submit_Date = #{submitDate,jdbcType=VARCHAR},
+        p.Actual_Duration = #{actualDuration},
+        p.Remark_Submit = #{remarkSubmit,jdbcType=VARCHAR}
+        WHERE
+        p.PAF_id = #{pafId,jdbcType=VARCHAR}
+        AND p.Project_id = #{projectId}
+        AND p.PAF_visio_Version = #{pafVisioVersion,jdbcType=VARCHAR}
+    </update>
+
+    <select id="findAllByProjectIdAndPafId" resultType="PafVisioVersionVo">
+        SELECT * FROM paf_visio_version
+        WHERE Project_id = #{projectId} AND PAF_id = #{pafId}
+    </select>
+
+    <delete id="deleteOnePAFEdition">
+        delete from paf_visio_version where Project_id =#{projectId} AND PAF_id=#{pafId} AND PAF_visio_Version = #{pafVisioVersion}
+    </delete>
+
+</mapper>

@@ -1,0 +1,59 @@
+package com.samhk.ynashk.controller.paf_code;
+
+import com.google.gson.Gson;
+import com.samhk.ynashk.mapper.SelectDownDao;
+import com.samhk.ynashk.service.NewPafAssignBo;
+import com.samhk.ynashk.util.Constants;
+import com.samhk.ynashk.vo.PafVisioVersionVo;
+import com.samhk.ynashk.vo.ProjectPafVo;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+
+@Controller
+@RequestMapping("/")
+public class NewPafAssignAction {
+
+    @Resource
+    private NewPafAssignBo newPafAssignBo;
+
+    @Resource
+    private SelectDownDao selectDownDao;
+
+    @RequestMapping("newPAFAssign.do")
+    public String goPafAssign(PafVisioVersionVo vo, Model model){
+        Constants.getRequest().setAttribute("pafVisioVersionVoList", new Gson().toJson(newPafAssignBo.getPafVisioVersionVoAllByStatus("assign")));
+        Constants.getRequest().setAttribute("visioVersionAll", new Gson().toJson(newPafAssignBo.getVisioVersionAllByType("assign")));
+        List<ProjectPafVo> projectPafVoList = selectDownDao.getProjectPafAll();
+        Constants.getRequest().setAttribute("projectDataList", projectPafVoList);
+        Constants.getRequest().setAttribute("projectDataListJson", new Gson().toJson(projectPafVoList));
+
+        if (vo.getPafId() !=null && vo.getProjectId() !=null && vo.getPafVisioVersion() !=null){
+            PafVisioVersionVo visioVersionByVo = newPafAssignBo.getPafVisioVersionByVo(vo);
+            model.addAttribute("pafVisioVersionVo",visioVersionByVo);
+        }
+        return "paf_code/newPafAssign";
+    }
+
+    @RequestMapping(value = "newPAFAssign.do",params = {"action=update"})
+    @ResponseBody
+    public boolean updatePafVisioVersion(PafVisioVersionVo pafVisioVersionVo){
+        try {
+           newPafAssignBo.updatePafVisioVersionByAssign(pafVisioVersionVo);
+           return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+}

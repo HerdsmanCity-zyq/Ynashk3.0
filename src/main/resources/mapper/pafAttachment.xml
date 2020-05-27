@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.PafAttachmentDao">
+
+    <sql id="Base_Column_List">
+    PAF_Attachment_id, PAF_id, PAF_Attachment_Name, PAF_Attachment_Desc, PAF_Attachment_Size, PAF_Path,
+    CRU, CRD, LUU, LUD
+  </sql>
+
+    <insert id="insertPafAttachment" parameterType="pafAttachmentVo">
+        INSERT INTO `paf_attachment`(`PAF_Attachment_id`, `PAF_id`, `PAF_Attachment_Name`, `PAF_Attachment_Desc`,
+         `PAF_Attachment_Size`, `PAF_Path`, `CRU`, `CRD`, `LUU`, `LUD`)
+         VALUES
+         (#{pafAttachmentId}, #{pafId}, #{pafAttachmentName}, #{pafAttachmentDesc}, #{pafAttachmentSize}, #{pafPath},
+         #{cru}, now(), #{luu}, now());
+    </insert>
+
+
+    <select id="selectIdByFrameworkIdAndVersionsIdAndPafId" resultType="Integer">
+        select
+          PAF_Attachment_id
+        from
+          paf_attachment
+        where PAF_id = #{pafId}
+        order by PAF_Attachment_id desc limit 1
+    </select>
+
+    <update id="updatePafAttachment" parameterType="pafAttachmentVo">
+    update paf_attachment set PAF_Attachment_Name = #{pafAttachmentName} ,PAF_Path = #{pafPath} , PAF_Attachment_Desc = #{pafAttachmentDesc} ,
+    PAF_Attachment_Size = #{pafAttachmentSize} ,  LUU = #{luu}, LUD = #{lud}
+    where PAF_Attachment_id = #{pafAttachmentId} and PAF_id = #{pafId}
+    </update>
+
+    <update id="updatePafAttachmentDesc" parameterType="pafAttachmentVo">
+    update paf_attachment set PAF_Attachment_Desc = #{pafAttachmentDesc} ,
+     LUU = #{luu}, LUD = #{lud}
+    where PAF_Attachment_id = #{pafAttachmentId} and PAF_id = #{pafId}
+    </update>
+
+
+    <select id="selectByCompositeKeys" resultType="pafAttachmentVo">
+        select
+        <include refid="Base_Column_List"/>
+        from
+        paf_attachment
+        where PAF_id = #{pafId} and PAF_Attachment_id = #{pafAttachmentId}
+    </select>
+
+
+    <select id="findAllByCompositeKeys" resultType="pafAttachmentVo">
+        select
+        PAF_Attachment_id, PAF_id, PAF_Attachment_Name, PAF_Attachment_Desc,
+    PAF_Attachment_Size,PAF_Path, DATE_FORMAT(CRD, '%Y/%m/%d') fileCrd
+        from
+        paf_attachment
+        where  PAF_id = #{pafId}
+    </select>
+
+
+    <delete id="delByCompositeKeys" parameterType="pafAttachmentVo">
+        delete from paf_attachment where PAF_id = #{pafId} and PAF_Attachment_id = #{pafAttachmentId}
+    </delete>
+
+
+</mapper>

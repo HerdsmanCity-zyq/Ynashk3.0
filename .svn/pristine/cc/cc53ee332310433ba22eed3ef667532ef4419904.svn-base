@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.ProjectVisioUploadLogDao">
+
+    <insert id="insertProjectVisioUploadLog" parameterType="ProjectVisioUploadLogVO">
+        insert into project_visio_upload_log(`Upload_Date`, `Project_id`, `PAF_id`, `PAF_visio_Version`, `Upload_By`)
+        values (
+        now(),#{projectId},#{pafId},#{pafVisioVersion},#{uploadBy}
+        )
+    </insert>
+
+</mapper>

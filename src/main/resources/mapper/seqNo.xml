@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.SeqNoDao">
+
+  <resultMap id="SeqNoMap" type="com.samhk.ynashk.mapper.SeqNoDao">
+    <constructor>
+      <idArg column="wnsId" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="lengthOfWatipersonNo" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="number" javaType="java.lang.Integer" jdbcType="INTEGER" />
+      <arg column="perfix" javaType="java.lang.String" jdbcType="VARCHAR" />
+      <arg column="remember" javaType="java.lang.String" jdbcType="VARCHAR" />
+    </constructor>
+  </resultMap>
+
+  <select id="selectOneSeqNo" resultType="com.samhk.ynashk.vo.SeqNoVo" parameterType="string">
+    select
+      length_of_watiPerson_no,number,perfix
+    from
+        seq_no
+    where
+        remember = #{newPaf}
+  </select>
+
+  <select id="findByRemember" resultType="com.samhk.ynashk.vo.SeqNoVo">
+    select
+      length_of_watiPerson_no,number,perfix
+    from
+        seq_no
+    where
+        remember = #{remember}
+    limit 1
+  </select>
+
+  <update id="updateSeqNo" parameterType="com.samhk.ynashk.vo.SeqNoVo">
+    update seq_no set number = #{number} where remember = #{remember}
+  </update>
+
+  <select id="getNoSeq" resultType="com.samhk.ynashk.vo.SeqNoVo" parameterType="java.lang.String">
+       SELECT  WNS_ID,length_of_watiPerson_no,NUMBER,PERFIX
+            FROM SEQ_NO WHERE REMEMBER = #{remember, jdbcType=VARCHAR}
+  </select>
+</mapper>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.FunctionDao">
+    <select id="getFunction" parameterType="menuVo" resultType="functionVo">
+		select
+			FUNCTION_CODE as functionCode,
+			FUNCTION_NAME as functionName,
+			OBJECT_NAME as objectName,
+			DISPLAY_ORDER as displayOrder
+		from sys_function WHERE MENU_CODE=#{menuCode}
+	</select>
+</mapper>

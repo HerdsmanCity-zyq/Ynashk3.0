@@ -1,0 +1,73 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /ynashk
+spring:
+    application:
+        name: Yna
+    jmx:
+      enabled: false
+    datasource:
+        username: root
+        password: root
+        driver-class-name: com.mysql.jdbc.Driver  # mysql8.0以前使用com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.1.18:3306/yna2?characterEncoding=utf8&useSSL=false&allowMultiQueries=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+        hikari:
+            read-only: false
+            connection-timeout: 60000
+            idle-timeout: 60000
+            validation-timeout: 3000
+            max-lifetime: 60000
+            login-timeout: 5
+            maximum-pool-size: 60
+            minimum-idle: 10
+
+    mvc:
+            view:
+              prefix: /WEB-INF/jsp/
+              suffix: .jsp
+    servlet:
+         multipart:
+           max-file-size: 100MB
+           max-request-size: 100MB
+    messages:
+        basename: i18n.message
+    redis:
+            database: 0
+            host: 127.0.0.1
+            port: 6379
+            password:
+            timeout: 3600ms
+            lettuce:
+                pool:
+                   max-active: 8
+            # 连接池最大阻塞等待时间（使用负值表示没有限制）
+                   max-wait: -1ms
+            # 连接池中的最大空闲连接
+                   max-idle: 1000
+            # 连接池中的最小空闲连接
+                   min-idle: 0
+
+## 该配置节点为独立的节点，有很多同学容易将这个配置放在spring的节点下，导致配置无法被识别
+mybatis:
+  config-location: classpath:mybatis/configuration.xml
+  mapper-locations: classpath:mapper/*.xml  #注意：一定要对应mapper映射xml文件的所在路径
+  type-aliases-package: com.samhk.ynashk.vo  # 注意：对应实体类的路径
+
+
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(%5p) %clr([%15.15t]){cyan} %clr(%X{__traceId}){magenta} %clr(%-40.40logger{39}){blue} %clr(:) %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %X{__traceId} %-40.40logger{39} : %m%n"
+  level:
+    #TRACE < DEBUG < INFO < WARN < ERROR < FATAL 默认输出info，这里指整个控制台的日志级别
+    root: info
+    #下面代码作用是在控制台输出指定路径的日志级别
+    com.samhk.ynashk.mapper: debug   #设置mapper.java包为debug输出
+    com.samhk.ynashk.shiro: debug
+    #com.ynashk.samelder.scheduledJob.listener: info
+  #file 将日志文件保存在指定路径，
+  file:
+    name: Yna/Yna.log
+    max-history: 30

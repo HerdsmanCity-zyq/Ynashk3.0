@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.FrameworkVisioUploadLogDao">
+    <sql id="Base_Column_List">
+ Framework_id, Versions_id, PAF_id, PAF_Status_id, PAF_Name, PAF_Name_Chi, BPWIN_No,
+    PAF_Remarks_id, Is_Public, Task_id, CRU, CRD, LUU, LUD,Customer_id,Project_id
+  </sql>
+
+    <insert id="insertVisioUploadLog" parameterType="FrameworkVisioUploadLogVO">
+        insert into framework_visio_upload_log
+        values (
+        #{uploadId},#{pafId},#{visioName},#{uploadBy},now()
+        )
+    </insert>
+
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.SearchPAFEditionListDao">
+
+    <resultMap id="SearchPAFEditionListVoMap" type="SearchPAFEditionListVo">
+        <result property="pafId" column="PAF_id"/>
+        <result property="frameworkName" column="Framework_Name"/>
+        <result property="versionsNo" column="Versions_No"/>
+        <result property="bpwinNo" column="BPWIN_No"/>
+        <result property="projectName" column="Project_Name_Eng"/>
+        <result property="pafName" column="PAF_Name"/>
+        <result property="pafNameChi" column="PAF_Name_Chi"/>
+        <result property="pafVisioVersion" column="PAF_visio_Version"/>
+        <result property="status" column="STATUS"/>
+        <result property="codeTo" column="Code_To"/>
+        <result property="assignDate" column="Assign_Date"/>
+        <result property="estDuration" column="Est_Duration"/>
+        <result property="assignTo" column="Assign_To"/>
+        <result property="submitStartDate" column="Submit_Start_date"/>
+        <result property="submitDate" column="Submit_Date"/>
+        <result property="actualDuration" column="Actual_Duration"/>
+		<result property="projectId" column="Project_id"></result>
+
+    </resultMap>
+
+    <select id="searchPAFEditionList" resultMap="SearchPAFEditionListVoMap">
+        SELECT
+			frameworkVersionPaf.PAF_id AS PAF_id,
+			framework.Framework_Name AS Framework_Name,
+			frameworkVersionPaf.Versions_No AS Versions_No,
+			frameworkVersionPaf.BPWIN_No AS BPWIN_No,
+			project.Project_Name_Eng AS Project_Name_Eng,
+			frameworkVersionPaf.PAF_Name AS PAF_Name,
+			frameworkVersionPaf.PAF_Name_Chi AS PAF_Name_Chi,
+			pafVisioVersion.PAF_visio_Version AS PAF_visio_Version,
+			pafVisioVersion.STATUS AS STATUS,
+			( SELECT CASE WHEN english_name IS NOT NULL AND english_name!="" THEN english_name ELSE chinese_name END FROM sys_user WHERE pafVisioVersion.Code_To = sys_user.USER_CODE ) AS Code_To,
+			pafVisioVersion.Assign_Date AS Assign_Date,
+			pafVisioVersion.Est_Duration AS Est_Duration,
+			( SELECT CASE WHEN english_name IS NOT NULL AND english_name!="" THEN english_name ELSE chinese_name END FROM sys_user WHERE pafVisioVersion.Assign_To = sys_user.USER_CODE ) AS Assign_To,
+			pafVisioVersion.Submit_Start_date AS Submit_Start_date,
+			pafVisioVersion.Submit_Date AS Submit_Date,
+			pafVisioVersion.Actual_Duration AS Actual_Duration,
+			pafVisioVersion.Project_id
+		FROM
+			framework AS framework
+			JOIN framework_version_paf AS frameworkVersionPaf ON framework.Framework_id = frameworkVersionPaf.Framework_id
+			JOIN project_paf AS projectPaf ON frameworkVersionPaf.PAF_id = projectPaf.PAF_id
+			JOIN project AS project ON projectPaf.Project_id = project.Project_id
+			JOIN paf_visio_version AS pafVisioVersion ON projectPaf.Project_id = pafVisioVersion.Project_id
+			AND projectPaf.PAF_id = pafVisioVersion.PAF_id
+    </select>
+
+</mapper>

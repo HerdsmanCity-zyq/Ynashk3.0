@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.samhk.ynashk.mapper.VersionsDao">
+	<sql id="Base_Column_List">
+    Framework_id, Versions_NO, CRU, CRD, LUU, LUD
+  </sql>
+	<select id="findByFrameworkId" parameterType="String" resultType="versionsVo">
+		select
+			<include refid="Base_Column_List"/>
+		from
+			versions
+		<where>
+            <if test="frameworkId!=null">
+                framework_id = #{frameworkId}
+            </if>
+        </where>
+		ORDER BY versions_NO desc
+	</select>
+
+	<select id="getCurrentVersionId" resultType="versionsVo">
+		select
+			<include refid="Base_Column_List"/>
+		from
+			versions
+		where framework_id = #{frameworkId} and versions_NO = #{versions_NO}
+	</select>
+
+
+    <select id="getMaxVersionByFraId" parameterType="versionsVo" resultType="versionsVo">
+        select * from versions where framework_id = #{frameworkId} ORDER BY versions_NO desc limit 1
+    </select>
+
+    <insert id="inserNewVersion" parameterType="versionsVo">
+        insert into versions
+        values(
+        #{frameworkId},
+        #{versionsNO},
+        #{cru},
+        now(),
+        #{luu},
+        now()
+        )
+    </insert>
+
+</mapper>
