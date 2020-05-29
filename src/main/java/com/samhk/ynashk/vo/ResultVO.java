@@ -24,6 +24,38 @@ public class ResultVO<T> {
     private long total;
 
 
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public long getTotal() {
+        return total;
+    }
+
+    public void setTotal(long total) {
+        this.total = total;
+    }
+
     public enum Status{
         /**
          * success 200
@@ -31,7 +63,8 @@ public class ResultVO<T> {
          */
         SUCCESS(200),FAIL(0);
         private final Integer status;
-         Status(Integer status){
+        // 枚举类的构造函数
+        Status(Integer status){
             this.status = status;
         }
 
@@ -54,7 +87,6 @@ public class ResultVO<T> {
 
     public ResultVO(Integer code, T data) {
         this.code = code;
-        this.msg = msg;
         this.data = data;
     }
 
@@ -62,6 +94,13 @@ public class ResultVO<T> {
         this.code = code;
         this.total = total;
         this.data = data;
+    }
+
+    public ResultVO(Integer code, String msg, T data, long total) {
+        this.code = code;
+        this.msg = msg;
+        this.data = data;
+        this.total = total;
     }
 
     /**
@@ -90,8 +129,12 @@ public class ResultVO<T> {
         return new ResultVO<T>(Status.SUCCESS.getStatus(), data);
     }
 
-    public static <T> ResultVO getSuccess( T data,long total) {
+    public static <T> ResultVO getSuccess(long total,T data) {
         return new ResultVO<T>(Status.SUCCESS.getStatus(),total, data);
+    }
+
+    public static <T> ResultVO getSuccess( String msg,long total,T data) {
+        return new ResultVO<T>(Status.SUCCESS.getStatus(),msg,data,total);
     }
 
     /**
@@ -136,28 +179,4 @@ public class ResultVO<T> {
         return new ResultVO(3, "用户没有操作权限，请重新登录");
     }
 
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
 }
